@@ -1,0 +1,77 @@
+---
+title: "Iris Data Analysis in R"
+author: "Piotr Ozga"
+format: html
+editor: visual
+---
+
+## Introdution
+
+This document demonstrates how to perform data analysis on the 'iris' dataset using **tidyverse** and **dplyr** R packages. The goal is to answer questions related to sepal and petal measurements across different species.
+
+## Task 1: Load the “iris” dataset and transform it to longer.
+
+Install required packages, if they are not already installed, and load them. Next, load `iris` dataset and transform it from wide to long format using `pivot_longer`. Finally, display the first rows of the transformed dataset.
+
+```{r}
+# 
+# install.packages("dplyr")
+# install.packages("tidyr")
+
+library(dplyr)
+library(tidyr)
+# Load the iris dataset
+data(iris)
+head(iris)
+
+# Transform to long format
+iris_long <- iris %>%
+  pivot_longer(
+    cols = c(Sepal.Length, Sepal.Width, Petal.Length, Petal.Width),
+    names_to = "Trait",
+    values_to = "Size"
+  )
+
+# Check the first rows
+head(iris_long)
+```
+
+## Task 2.1: What is the mean length and width of the sepal and petal of each species?
+
+Calculate the mean of each trait for each species. This allows us to compare sepal and petal sizes between species.
+
+```{r}
+iris_long %>% 
+  group_by(Species, Trait) %>% 
+  summarise(
+    mean_size = mean(Size)
+  )
+```
+
+## Task 2.2: What is the largest and widest, petal and sepal, of virginica and versicolor species?
+
+Show the maximum value of each trait for only *Virginica* and *Versicolor* species.
+
+```{r}
+iris_long %>% 
+  filter(Species %in% c("virginica", "versicolor")) %>% 
+  group_by(Species, Trait) %>% 
+  summarise(
+    max_size = max(Size)
+  )
+```
+
+## Task 2.3: For each species, for sepal and petal width and length, how many observations are above the mean?
+
+Count the number of observations that are higher than the mean for each combination of species and trait.
+
+```{r}
+iris_long %>% 
+  group_by(Species, Trait) %>% 
+  mutate(mean_size = mean(Size)) %>%
+  summarise(above_mean=sum(Size > mean_size))
+```
+
+## Summary
+
+In this analysis, the `iris` dataset was first transformed from wide to long format using pivot_longer, resulting in a tidy dataset with three columns: `Species`, `Trait` and `Size`. We then calculated the mean length and width of sepals and petals for each species, finding, for example, that *setosa* has smaller petals (Petal.Length mean = 1.46, Petal.Width mean = 0.25) compared to *versicolor* and *virginica*. Next, we identified the largest measurements of sepals and petals for *virginica* and *versicolor*, showing that *virginica* has the longest petals (Petal.Length max = 6.9) and the widest petals (Petal.Width max = 2.5), while *versicolor* has smaller maximum values. Finally, we counted how many observations exceed the mean for each species and trait.
